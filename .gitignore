@@ -1,0 +1,5 @@
+dist/
+calculator-example-html
+calculator-example-html.exe
+tmp*
+assets_vfsdata.go
