@@ -4,13 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 )
 
 func main() {
 	log.SetFlags(0)
 
-	var listenAddress = flag.String("listen", "localhost:8000", "Listen address.")
+	var listenAddress = flag.String("listen", "localhost:8000", "Listen address. You can use localhost:0 to listen at a random port.")
 
 	flag.Parse()
 
@@ -19,11 +20,14 @@ func main() {
 		log.Fatalf("\nERROR You MUST NOT pass any positional arguments")
 	}
 
-	fmt.Printf("Listening at http://%s\n", *listenAddress)
+	listener, err := net.Listen("tcp", *listenAddress)
+	if err != nil {
+		log.Fatalf("Failed to Listen: %v", err)
+	}
+	addr := listener.Addr().(*net.TCPAddr)
+	fmt.Printf("Listening at http://%s\n", addr)
 
-	http.Handle("/", http.FileServer(assets))
-
-	err := http.ListenAndServe(*listenAddress, nil)
+	err = http.Serve(listener, http.FileServer(assets))
 	if err != nil {
 		log.Fatalf("Failed to ListenAndServe: %v", err)
 	}
